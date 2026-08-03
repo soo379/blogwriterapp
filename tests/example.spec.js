@@ -1,6 +1,6 @@
 const { test, expect } = require('@playwright/test');
 
-test('smoke: about:blank loads', async ({ page }) => {
-  await page.goto('about:blank');
-  expect(page.url()).toBe('about:blank');
+test('page: docs index serves', async ({ page }) => {
+  await page.goto('/');
+  await expect(page).toHaveTitle(/Blog Writer/i);
 });

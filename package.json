@@ -8,6 +8,7 @@
     "lint:js": "eslint --ext .js docs blog_writer_app || true",
     "lint": "npm run lint:html && npm run lint:md && npm run lint:js",
     "format:check": "prettier --check \"**/*.{js,html,css,md,json}\"",
+    "start": "http-server docs -p 3000",
     "test": "playwright test --reporter=list",
     "ci": "npm run lint && npm run format:check && npm run test"
   },
@@ -16,6 +17,8 @@
     "eslint": "^8.44.0",
     "html-validate": "^8.10.0",
     "markdownlint-cli": "^0.33.0",
-    "prettier": "^2.8.8"
+    "prettier": "^2.8.8",
+    "http-server": "^14.1.1",
+    "wait-on": "^7.0.1"
   }
 }
