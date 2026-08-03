@@ -1,0 +1,21 @@
+{
+  "name": "blog-writer-app",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "lint:html": "html-validate docs/index.html",
+    "lint:md": "markdownlint docs/*.md",
+    "lint:js": "eslint --ext .js docs blog_writer_app || true",
+    "lint": "npm run lint:html && npm run lint:md && npm run lint:js",
+    "format:check": "prettier --check \"**/*.{js,html,css,md,json}\"",
+    "test": "playwright test --reporter=list",
+    "ci": "npm run lint && npm run format:check && npm run test"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.36.0",
+    "eslint": "^8.44.0",
+    "html-validate": "^8.10.0",
+    "markdownlint-cli": "^0.33.0",
+    "prettier": "^2.8.8"
+  }
+}
