@@ -64,10 +64,14 @@
     <div class="actions">
       <button id="generate" class="button primary">글 구조 생성</button>
       <button id="loadExample" class="button secondary">예시 로드</button>
+      <button id="clearForm" class="button secondary">양식 초기화</button>
       <button id="copyMarkdown" class="button">Markdown 복사</button>
       <button id="exportMarkdown" class="button">Markdown 내보내기</button>
+    </div>
+    <div class="template-actions">
+      <input id="templateName" placeholder="템플릿 이름 입력" />
       <button id="saveTemplate" class="button">템플릿 저장</button>
-      <select id="templateList" style="border-radius:12px;padding:10px;">
+      <select id="templateList">
         <option value="">저장된 템플릿 없음</option>
       </select>
       <button id="loadTemplate" class="button">템플릿 불러오기</button>

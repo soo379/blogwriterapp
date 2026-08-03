@@ -1,9 +1,16 @@
 const sectionsContainer = document.getElementById('sections');
 const generateButton = document.getElementById('generate');
 const loadExampleButton = document.getElementById('loadExample');
+const clearFormButton = document.getElementById('clearForm');
+const saveTemplateButton = document.getElementById('saveTemplate');
+const loadTemplateButton = document.getElementById('loadTemplate');
+const templateNameInput = document.getElementById('templateName');
+const templateListSelect = document.getElementById('templateList');
 const previewTabButtons = document.querySelectorAll('[data-tab]');
 const previewPanel = document.getElementById('preview');
 const markdownPanel = document.getElementById('markdown');
+const wordCountElement = document.getElementById('wordCount');
+const imageWarningElement = document.getElementById('imageWarning');
 
 const defaultSectionCount = 5;
 const sampleSections = [
@@ -217,6 +224,16 @@ function saveTemplateToStorage(name, post) {
   alert('템플릿이 저장되었습니다.');
 }
 
+function attachDraftListeners() {
+  const fields = ['title', 'subtitle', 'summary', 'intro', 'keywords', 'tags', 'cta', 'images'];
+  fields.forEach((field) => {
+    const element = document.getElementById(field);
+    if (!element) return;
+    element.addEventListener('input', persistDraft);
+  });
+  document.addEventListener('input', persistDraft);
+}
+
 function loadTemplatesUI() {
   const sel = document.getElementById('templateList');
   sel.innerHTML = '';
@@ -268,15 +285,70 @@ function estimateWordCount(md) {
 
 function updateWordCountAndWarnings(md, images) {
   const wc = estimateWordCount(md);
-  const wcElem = document.getElementById('wordCount');
-  wcElem.textContent = `권장 단어수: 1700 · 현재 추정 단어수: ${wc}`;
-  const imgWarn = document.getElementById('imageWarning');
+  wordCountElement.textContent = `권장 단어수: 1700 · 현재 추정 단어수: ${wc}`;
   const imgCount = images ? images.length : 0;
   if (imgCount < 4) {
-    imgWarn.textContent = `권장 이미지 수는 4개 이상입니다. 현재 이미지 수: ${imgCount}`;
+    imageWarningElement.textContent = `권장 이미지 수는 4개 이상입니다. 현재 이미지 수: ${imgCount}`;
   } else {
-    imgWarn.textContent = '';
+    imageWarningElement.textContent = '';
   }
+}
+
+function persistDraft() {
+  const draft = {
+    title: getFormValue('title'),
+    subtitle: getFormValue('subtitle'),
+    summary: getFormValue('summary'),
+    intro: getFormValue('intro'),
+    keywords: getFormValue('keywords'),
+    tags: getFormValue('tags'),
+    cta: getFormValue('cta'),
+    images: getFormValue('images'),
+    sections: buildSectionsFromForm(),
+  };
+  localStorage.setItem('bwa_draft', JSON.stringify(draft));
+}
+
+function loadDraft() {
+  const raw = localStorage.getItem('bwa_draft');
+  if (!raw) return false;
+  try {
+    const draft = JSON.parse(raw);
+    document.getElementById('title').value = draft.title || '';
+    document.getElementById('subtitle').value = draft.subtitle || '';
+    document.getElementById('summary').value = draft.summary || '';
+    document.getElementById('intro').value = draft.intro || '';
+    document.getElementById('keywords').value = draft.keywords || '';
+    document.getElementById('tags').value = draft.tags || '';
+    document.getElementById('cta').value = draft.cta || '';
+    document.getElementById('images').value = draft.images || '';
+    sectionsContainer.innerHTML = '';
+    (draft.sections || []).forEach((section) => addSection(section));
+    generatePost();
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
+
+function clearForm() {
+  document.getElementById('title').value = '';
+  document.getElementById('subtitle').value = '';
+  document.getElementById('summary').value = '';
+  document.getElementById('intro').value = '';
+  document.getElementById('keywords').value = '';
+  document.getElementById('tags').value = '';
+  document.getElementById('cta').value = '';
+  document.getElementById('images').value = '';
+  templateNameInput.value = '';
+  sectionsContainer.innerHTML = '';
+  for (let i = 0; i < defaultSectionCount; i += 1) {
+    addSection({});
+  }
+  previewPanel.innerHTML = '';
+  markdownPanel.textContent = '';
+  updateWordCountAndWarnings('', []);
+  localStorage.removeItem('bwa_draft');
 }
 
 function setActiveTab(tabName) {
@@ -305,13 +377,17 @@ function init() {
     addSection(sampleSections[i] || {});
   }
 
-  generateButton.addEventListener('click', generatePost);
+  generateButton.addEventListener('click', () => {
+    generatePost();
+    persistDraft();
+  });
   loadExampleButton.addEventListener('click', loadExample);
+  clearFormButton.addEventListener('click', clearForm);
   document.getElementById('copyMarkdown').addEventListener('click', () => copyToClipboard(markdownPanel.textContent));
-  document.getElementById('exportMarkdown').addEventListener('click', () => exportMarkdownFile('blog-post.md', markdownPanel.textContent));
-  document.getElementById('saveTemplate').addEventListener('click', () => {
-    const name = prompt('템플릿 이름을 입력하세요:');
-    if (!name) return;
+  document.getElementById('exportMarkdown').addEventListener('click', () => exportMarkdownFile(`${getFormValue('title') || 'blog-post'}.md`, markdownPanel.textContent));
+  saveTemplateButton.addEventListener('click', () => {
+    const name = templateNameInput.value.trim();
+    if (!name) return alert('템플릿 이름을 입력하세요.');
     const post = {
       title: getFormValue('title'),
       subtitle: getFormValue('subtitle'),
@@ -325,19 +401,21 @@ function init() {
     };
     saveTemplateToStorage(name, post);
   });
-  document.getElementById('loadTemplate').addEventListener('click', () => {
-    const sel = document.getElementById('templateList');
-    if (!sel.value) return alert('템플릿을 선택하세요.');
-    loadTemplateFromStorage(Number(sel.value));
+  loadTemplateButton.addEventListener('click', () => {
+    if (!templateListSelect.value) return alert('템플릿을 선택하세요.');
+    loadTemplateFromStorage(Number(templateListSelect.value));
   });
   loadTemplatesUI();
+  attachDraftListeners();
   previewTabButtons.forEach((button) => {
     button.addEventListener('click', () => setActiveTab(button.dataset.tab));
   });
 
   document.getElementById('addSection').addEventListener('click', () => addSection({}));
   setActiveTab('preview');
-  loadExample();
+  if (!loadDraft()) {
+    loadExample();
+  }
 }
 
 init();
