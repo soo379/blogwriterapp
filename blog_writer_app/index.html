@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>네이버 블로그 글쓰기 앱</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="container">
+    <h1>네이버 블로그 글쓰기 앱</h1>
+    <p class="intro">상위 3개 블로그 벤치마킹 기반으로 네이버 블로그 글 구조를 빠르게 생성하고, 복사해서 바로 사용할 수 있습니다.</p>
+
+    <section class="panel">
+      <h2>1. 글 기본 정보</h2>
+      <div class="field-row">
+        <label>제목</label>
+        <input id="title" placeholder="네이버 블로그 상위 노출 공식" />
+      </div>
+      <div class="field-row">
+        <label>부제목</label>
+        <input id="subtitle" placeholder="트렌디한 제목과 요약 작성법" />
+      </div>
+      <div class="field-row">
+        <label>요약</label>
+        <textarea id="summary" rows="2" placeholder="상위 3개 글의 핵심 패턴을 반영한 요약을 작성하세요."></textarea>
+      </div>
+      <div class="field-row">
+        <label>인트로</label>
+        <textarea id="intro" rows="3" placeholder="첫 문단에 왜 이 글을 읽어야 하는지 명확히 입력하세요."></textarea>
+      </div>
+      <div class="field-row">
+        <label>키워드 (쉼표로 구분)</label>
+        <input id="keywords" placeholder="네이버 블로그, 상위 노출, 블로그 글쓰기" />
+      </div>
+      <div class="field-row">
+        <label>태그 (쉼표로 구분)</label>
+        <input id="tags" placeholder="네이버SEO, 콘텐츠전략, 글쓰기팁" />
+      </div>
+      <div class="field-row">
+        <label>CTA 문구</label>
+        <input id="cta" placeholder="이제 바로 내 글을 작성해보세요." />
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>2. 섹션 구성</h2>
+      <div id="sections"></div>
+      <button id="addSection" class="button small">섹션 추가</button>
+    </section>
+
+    <section class="panel">
+      <h2>3. 이미지 & 추천 기준</h2>
+      <div class="field-row">
+        <label>이미지 URL (쉼표로 구분, 최소 4개 권장)</label>
+        <input id="images" placeholder="/images/hero.png, /images/checklist.png, /images/alt.png, /images/internal.png" />
+      </div>
+      <div class="benchmark">
+        <strong>벤치마크</strong>
+        <p>권장 글자 수: 1700 / 권장 이미지 수: 4 / 권장 섹션 수: 5</p>
+      </div>
+    </section>
+
+    <div class="actions">
+      <button id="generate" class="button primary">글 구조 생성</button>
+      <button id="loadExample" class="button secondary">예시 로드</button>
+    </div>
+
+    <section class="panel output-panel">
+      <h2>생성 결과</h2>
+      <div class="output-tabs">
+        <button data-tab="preview" class="tab active">미리보기</button>
+        <button data-tab="markdown" class="tab">Markdown</button>
+      </div>
+      <div id="preview" class="output active"></div>
+      <div id="markdown" class="output"></div>
+    </section>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>
