@@ -64,6 +64,13 @@
     <div class="actions">
       <button id="generate" class="button primary">글 구조 생성</button>
       <button id="loadExample" class="button secondary">예시 로드</button>
+      <button id="copyMarkdown" class="button">Markdown 복사</button>
+      <button id="exportMarkdown" class="button">Markdown 내보내기</button>
+      <button id="saveTemplate" class="button">템플릿 저장</button>
+      <select id="templateList" style="border-radius:12px;padding:10px;">
+        <option value="">저장된 템플릿 없음</option>
+      </select>
+      <button id="loadTemplate" class="button">템플릿 불러오기</button>
     </div>
 
     <section class="panel output-panel">
@@ -74,6 +81,10 @@
       </div>
       <div id="preview" class="output active"></div>
       <div id="markdown" class="output"></div>
+      <div class="meta">
+        <p id="wordCount">권장 단어수: 1700 · 현재 추정 단어수: 0</p>
+        <p id="imageWarning" style="color:#c65353;margin:6px 0 0 0;"></p>
+      </div>
     </section>
   </main>
   <script src="app.js"></script>

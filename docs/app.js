@@ -180,6 +180,103 @@ function generatePost() {
 
   previewPanel.innerHTML = renderPreview(post);
   markdownPanel.textContent = generateMarkdown(post);
+  updateWordCountAndWarnings(markdownPanel.textContent, post.images);
+}
+
+function copyToClipboard(text) {
+  if (!navigator.clipboard) {
+    alert('클립보드 API를 지원하지 않는 브라우저입니다.');
+    return;
+  }
+  navigator.clipboard.writeText(text).then(
+    () => alert('Markdown이 클립보드에 복사되었습니다.'),
+    (err) => alert('복사 실패: ' + err)
+  );
+}
+
+function exportMarkdownFile(filename, text) {
+  const blob = new Blob([text], { type: 'text/markdown;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+// Templates stored in localStorage under key 'bwa_templates'
+function saveTemplateToStorage(name, post) {
+  if (!name) return alert('템플릿 이름을 입력하세요.');
+  const raw = localStorage.getItem('bwa_templates');
+  const arr = raw ? JSON.parse(raw) : [];
+  arr.push({ name, post });
+  localStorage.setItem('bwa_templates', JSON.stringify(arr));
+  loadTemplatesUI();
+  alert('템플릿이 저장되었습니다.');
+}
+
+function loadTemplatesUI() {
+  const sel = document.getElementById('templateList');
+  sel.innerHTML = '';
+  const raw = localStorage.getItem('bwa_templates');
+  const arr = raw ? JSON.parse(raw) : [];
+  if (arr.length === 0) {
+    const opt = document.createElement('option');
+    opt.value = '';
+    opt.textContent = '저장된 템플릿 없음';
+    sel.appendChild(opt);
+    return;
+  }
+  const empty = document.createElement('option');
+  empty.value = '';
+  empty.textContent = '템플릿 선택...';
+  sel.appendChild(empty);
+  arr.forEach((t, i) => {
+    const opt = document.createElement('option');
+    opt.value = String(i);
+    opt.textContent = t.name;
+    sel.appendChild(opt);
+  });
+}
+
+function loadTemplateFromStorage(index) {
+  const raw = localStorage.getItem('bwa_templates');
+  const arr = raw ? JSON.parse(raw) : [];
+  if (!arr || !arr[index]) return alert('선택한 템플릿을 불러올 수 없습니다.');
+  const post = arr[index].post;
+  // populate form
+  document.getElementById('title').value = post.title || '';
+  document.getElementById('subtitle').value = post.subtitle || '';
+  document.getElementById('summary').value = post.summary || '';
+  document.getElementById('intro').value = post.intro || '';
+  document.getElementById('keywords').value = (post.keywords || []).join(', ');
+  document.getElementById('tags').value = (post.tags || []).join(', ');
+  document.getElementById('cta').value = post.cta || '';
+  document.getElementById('images').value = (post.images || []).join(', ');
+  sectionsContainer.innerHTML = '';
+  (post.sections || []).forEach((s) => addSection(s));
+  generatePost();
+}
+
+function estimateWordCount(md) {
+  if (!md) return 0;
+  const words = md.replace(/[^\w\s가-힣]/g, ' ').trim().split(/\s+/).filter(Boolean);
+  return words.length;
+}
+
+function updateWordCountAndWarnings(md, images) {
+  const wc = estimateWordCount(md);
+  const wcElem = document.getElementById('wordCount');
+  wcElem.textContent = `권장 단어수: 1700 · 현재 추정 단어수: ${wc}`;
+  const imgWarn = document.getElementById('imageWarning');
+  const imgCount = images ? images.length : 0;
+  if (imgCount < 4) {
+    imgWarn.textContent = `권장 이미지 수는 4개 이상입니다. 현재 이미지 수: ${imgCount}`;
+  } else {
+    imgWarn.textContent = '';
+  }
 }
 
 function setActiveTab(tabName) {
@@ -210,6 +307,30 @@ function init() {
 
   generateButton.addEventListener('click', generatePost);
   loadExampleButton.addEventListener('click', loadExample);
+  document.getElementById('copyMarkdown').addEventListener('click', () => copyToClipboard(markdownPanel.textContent));
+  document.getElementById('exportMarkdown').addEventListener('click', () => exportMarkdownFile('blog-post.md', markdownPanel.textContent));
+  document.getElementById('saveTemplate').addEventListener('click', () => {
+    const name = prompt('템플릿 이름을 입력하세요:');
+    if (!name) return;
+    const post = {
+      title: getFormValue('title'),
+      subtitle: getFormValue('subtitle'),
+      summary: getFormValue('summary'),
+      intro: getFormValue('intro'),
+      images: parseList(getFormValue('images')),
+      keywords: parseList(getFormValue('keywords')),
+      tags: parseList(getFormValue('tags')),
+      cta: getFormValue('cta'),
+      sections: buildSectionsFromForm(),
+    };
+    saveTemplateToStorage(name, post);
+  });
+  document.getElementById('loadTemplate').addEventListener('click', () => {
+    const sel = document.getElementById('templateList');
+    if (!sel.value) return alert('템플릿을 선택하세요.');
+    loadTemplateFromStorage(Number(sel.value));
+  });
+  loadTemplatesUI();
   previewTabButtons.forEach((button) => {
     button.addEventListener('click', () => setActiveTab(button.dataset.tab));
   });

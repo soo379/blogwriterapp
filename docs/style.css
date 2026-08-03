@@ -84,6 +84,11 @@ textarea {
   gap: 8px;
   margin-bottom: 16px;
 }
+.meta {
+  margin-top: 10px;
+  font-size: 0.95rem;
+  color: #394251;
+}
 .tab {
   background: #f4f5f8;
   border: none;
