@@ -55,6 +55,10 @@ test.describe('Docs app E2E', () => {
     const fs = require('fs');
     expect(fs.existsSync(tmpPath)).toBe(true);
     // cleanup
+    // verify content includes expected title and CTA
+    const content = fs.readFileSync(tmpPath, 'utf8');
+    expect(content).toContain('# 2026 네이버 블로그 상위 노출 공식');
+    expect(content).toContain('추천 CTA');
     fs.unlinkSync(tmpPath);
   });
 
@@ -75,5 +79,24 @@ test.describe('Docs app E2E', () => {
 
     const copied = await page.evaluate(() => window._copiedText);
     expect(copied).toContain('2026 네이버 블로그 상위 노출 공식');
+  });
+
+  test('copy to clipboard failure shows alert', async ({ page }) => {
+    await page.evaluate(() => {
+      window._copiedText = null;
+      navigator.clipboard = {
+        writeText: (t) => Promise.reject('mock-error')
+      };
+    });
+
+    page.once('dialog', async (dialog) => {
+      expect(dialog.type()).toBe('alert');
+      expect(dialog.message()).toContain('복사 실패');
+      await dialog.dismiss();
+    });
+
+    await page.click('#loadExample');
+    await page.click('#generate');
+    await page.click('#copyMarkdown');
   });
 });
