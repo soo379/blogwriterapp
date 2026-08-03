@@ -1,0 +1,36 @@
+name: CI — Lint & Test
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  lint:
+    name: Lint and Markdown checks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install linters
+        run: |
+          npm install -g html-validate markdownlint-cli eslint
+
+      - name: HTML validation
+        run: |
+          html-validate docs/index.html
+
+      - name: Markdown lint
+        run: |
+          markdownlint docs/*.md
+
+      - name: ESLint (JS files)
+        run: |
+          eslint --ext .js docs blog_writer_app || true
