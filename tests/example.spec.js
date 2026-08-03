@@ -36,4 +36,44 @@ test.describe('Docs app E2E', () => {
     await page.click('#generate');
     await expect(page.locator('#preview')).toContainText('추가된 섹션 제목');
   });
+
+  test('export triggers a download', async ({ page }) => {
+    await page.click('#loadExample');
+    await page.click('#generate');
+
+    const [download] = await Promise.all([
+      page.waitForEvent('download'),
+      page.click('#exportMarkdown'),
+    ]);
+
+    // Ensure a download object was created
+    const suggested = download.suggestedFilename();
+    expect(suggested).toContain('blog-post');
+    // attempt to save to a temporary path
+    const tmpPath = require('path').join(__dirname, '..', 'tmp-download.md');
+    await download.saveAs(tmpPath);
+    const fs = require('fs');
+    expect(fs.existsSync(tmpPath)).toBe(true);
+    // cleanup
+    fs.unlinkSync(tmpPath);
+  });
+
+  test('copy to clipboard uses navigator.clipboard mock', async ({ page }) => {
+    await page.evaluate(() => {
+      window._copiedText = null;
+      navigator.clipboard = {
+        writeText: (t) => {
+          window._copiedText = t;
+          return Promise.resolve();
+        }
+      };
+    });
+
+    await page.click('#loadExample');
+    await page.click('#generate');
+    await page.click('#copyMarkdown');
+
+    const copied = await page.evaluate(() => window._copiedText);
+    expect(copied).toContain('2026 네이버 블로그 상위 노출 공식');
+  });
 });
