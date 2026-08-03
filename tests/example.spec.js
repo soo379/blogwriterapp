@@ -54,11 +54,11 @@ test.describe('Docs app E2E', () => {
     await download.saveAs(tmpPath);
     const fs = require('fs');
     expect(fs.existsSync(tmpPath)).toBe(true);
-    // cleanup
-    // verify content includes expected title and CTA
     const content = fs.readFileSync(tmpPath, 'utf8');
     expect(content).toContain('# 2026 네이버 블로그 상위 노출 공식');
     expect(content).toContain('추천 CTA');
+    expect(content).toContain('**이미지 URL:**');
+    expect(content).toContain('**키워드:**');
     fs.unlinkSync(tmpPath);
   });
 
@@ -98,5 +98,18 @@ test.describe('Docs app E2E', () => {
     await page.click('#loadExample');
     await page.click('#generate');
     await page.click('#copyMarkdown');
+  });
+
+  test('export markdown UI shows success path when download is triggered', async ({ page }) => {
+    await page.click('#loadExample');
+    await page.click('#generate');
+
+    const [download] = await Promise.all([
+      page.waitForEvent('download'),
+      page.click('#exportMarkdown'),
+    ]);
+
+    const suggested = download.suggestedFilename();
+    expect(suggested).toContain('blog-post');
   });
 });

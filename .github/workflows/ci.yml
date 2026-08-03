@@ -31,16 +31,5 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps
 
-      - name: Start static server
-        run: |
-          npx http-server docs -p 3000 &
-          sleep 1
-          echo "Waiting for http://localhost:3000 to be available..."
-          npx wait-on http://localhost:3000 --timeout 30000
-          echo "Server started. Listing processes and port bindings for debug:"
-          ps aux | sed -n '1,200p' || true
-          ss -ltnp | sed -n '1,200p' || netstat -tulpn || true
-          curl --retry 6 --retry-delay 2 --fail -v http://localhost:3000 || (echo 'curl failed' && exit 1)
-
-      - name: Run tests
-        run: npm test
+      - name: Run tests with server
+        run: npx start-server-and-test --verbose --timeout 30000 "npm:start" http://localhost:3000 "npm test"

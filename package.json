@@ -19,6 +19,7 @@
     "markdownlint-cli": "^0.33.0",
     "prettier": "^2.8.8",
     "http-server": "^14.1.1",
+    "start-server-and-test": "^1.14.0",
     "wait-on": "^7.0.1"
   }
 }
