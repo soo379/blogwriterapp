@@ -2,8 +2,8 @@ TRENDING_BENCHMARK = {
     "top_posts_to_benchmark": 3,
     "avg_word_count": 1700,
     "recommended_word_count": 1700,
-    "avg_images": 4,
-    "recommended_images": 4,
+    "avg_images": 8,
+    "recommended_images": 8,
     "avg_sections": 5,
     "recommended_bullets_per_section": 3,
 }
